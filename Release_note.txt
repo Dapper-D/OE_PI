@@ -1,0 +1,9 @@
+Project Launch: GhostHID Alpha v0.1
+
+I am launching GhostHID to solve the problem of aggressive mouse-jiggler detection. I have designed the architecture and coded the "Human Logic" and "Hardware Spoofing" layers.
+
+Current Status: > * Code Complete: Simulation logic, USB Gadget scripts, and Windows Installer logic are live.
+
+Hardware Needed: Looking for 2-3 Beta Testers with a Raspberry Pi Zero or Zero 2 W to verify the HID descriptors on Windows 10/11.
+
+Goal: Create a "Flash-and-Forget" SD image for non-technical users.
