@@ -2,52 +2,37 @@ import time
 import random
 import datetime
 
-# HID keycodes for standard characters
-NULL_CHAR = bytes((0,)*8)
-def type_key(key_code):
-    with open('/dev/hidg0', 'rb+') as fd:
-        # Press key
-        fd.write(bytes((0, 0, key_code, 0, 0, 0, 0, 0)))
-        # Release key
-        fd.write(NULL_CHAR)
+def send_report(report, device="/dev/hidg0"):
+    with open(device, 'rb+') as fd:
+        fd.write(report)
 
-def move_mouse(x, y):
-    with open('/dev/hidg1', 'rb+') as fd:
-        # x, y are signed bytes (-127 to 127)
-        fd.write(bytes((0, x, y, 0)))
-
-def human_typing(text):
-    for char in text:
-        # Simple ASCII to HID mapping (Simplified for A-Z, space, and backspace)
-        # 0x04 is 'a', 0x2c is space, etc.
-        type_key(random.randint(4, 29)) # Just typing random junk to look like work
-        time.sleep(random.uniform(0.1, 0.3))
+def human_type_random():
+    # Types random 'work-like' characters with human delays
+    for _ in range(random.randint(10, 50)):
+        key = random.randint(4, 29) # a-z
+        send_report(bytes((0, 0, key, 0, 0, 0, 0, 0))) # Press
+        send_report(bytes((0,)*8)) # Release
+        time.sleep(random.uniform(0.1, 0.4))
         
-        # 3% chance of a typo
-        if random.random() < 0.03:
-            type_key(40) # Enter/Error
-            time.sleep(0.5)
-            type_key(42) # Backspace
+        # 2% Typo chance
+        if random.random() < 0.02:
+            send_report(bytes((0, 0, 42, 0, 0, 0, 0, 0))) # Backspace
 
-def workday_loop():
-    while True:
-        now = datetime.datetime.now().time()
-        # Only active between 09:00 and 17:00
-        if datetime.time(9,0) <= now <= datetime.time(17,0):
-            # 1. Move Mouse "Organically"
-            for _ in range(random.randint(10, 30)):
-                move_mouse(random.randint(-2, 2), random.randint(-2, 2))
-                time.sleep(0.1)
-            
-            # 2. Type a random note
-            notes = open("work_notes.txt").readlines()
-            human_typing(random.choice(notes))
-            
-            # 3. Random "Thinking" pause
-            time.sleep(random.randint(60, 300))
-        else:
-            print("After hours. Sleeping...")
-            time.sleep(1800)
+def organic_mouse():
+    # Move mouse in a small jittery pattern
+    for _ in range(random.randint(5, 20)):
+        x, y = random.randint(-2, 2), random.randint(-2, 2)
+        send_report(bytes((0, x, y, 0)), "/dev/hidg1")
+        time.sleep(0.1)
 
 if __name__ == "__main__":
-    workday_loop()
+    while True:
+        now = datetime.datetime.now().time()
+        # Active hours: 9 AM to 5 PM
+        if datetime.time(9,0) <= now <= datetime.time(17,0):
+            organic_mouse()
+            if random.random() < 0.3: # 30% chance to type something
+                human_type_random()
+            time.sleep(random.randint(30, 90)) # Wait between actions
+        else:
+            time.sleep(600) # Sleep longer after hours
