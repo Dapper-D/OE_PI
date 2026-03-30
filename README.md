@@ -11,6 +11,16 @@ Unlike software-based mouse jigglers or simple Arduino scripts, GhostHID operate
 * **Non-Linear Mouse Movement:** Uses Bezier curves instead of straight-line cursor movement.
 * **Workday Logic:** Supports shift schedules, randomized start and end times, and lunch breaks.
 
+generator.py (The Pen): Creates the work_notes.txt.
+
+work_notes.txt (The Script): Acts as the "memory" for the Pi.
+
+ghost_sim.py (The Actor): Reads the notes and decides when to type them.
+
+setup_hid.sh (The Costume): Makes the Pi look like a Logitech keyboard so the Actor can perform on the "stage" (your work PC).
+
+GhostHID_Installer.exe (The Director): The only thing the user clicks to make sure all the other files are in the right place.
+
 ## How It Works
 
 GhostHID uses a three-layer system:
