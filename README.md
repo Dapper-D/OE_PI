@@ -1,66 +1,97 @@
-GhostHID: The Human-Centric Peripheral Emulator.
- GhostHID is an open-source hardware simulation tool designed to bypass advanced activity monitoring systems (like those found in remote desktop environments like Citrix or VMware).
- 
-## 🏗️ How it Works: The Three-Layer System
+# GhostHID: The Human-Centric Peripheral Emulator
 
-1.  **The Hardware Layer (`setup_hid.sh`):** Configures the Linux kernel to "spoof" a real USB peripheral. It creates `/dev/hidg0` (Keyboard) and `/dev/hidg1` (Mouse).
-2.  **The Data Layer (`generator.py`):** Creates a library of 50+ professional-sounding "Work Notes" (AWS, Cloud, Project Management) so the typing looks contextually relevant.
-3.  **The Logic Layer (`ghost_sim.py`):** The "brain." It reads the notes, calculates human-like typing speeds, injects typos/corrections, and moves the mouse using non-linear math.
+GhostHID is an open-source hardware simulation tool that turns a Raspberry Pi Zero into a USB keyboard and mouse device capable of producing realistic human-like activity.
 
-## 📂 File Manifest
+## Why GhostHID?
 
-| File | Purpose |
-| :--- | :--- |
-| `setup_hid.sh` | Run once at boot to enable USB Keyboard/Mouse mode. |
-| `generator.py` | Run on your PC to generate the `work_notes.txt` file. |
-| `ghost_sim.py` | The main script that runs the simulation loop. |
-| `work_notes.txt` | The database of text the Pi will "type" throughout the day. |
+Unlike software-based mouse jigglers or simple Arduino scripts, GhostHID operates as a hardware-level USB Human Interface Device (HID).
 
-## 🚀 Installation & Usage
+* **Hardware Spoofing:** Appears as a normal consumer keyboard and mouse by using custom Vendor IDs (VID) and Product IDs (PID).
+* **Variable Keystroke Dynamics:** Uses randomized typing speed, delays, typos, and corrections to simulate real typing behavior.
+* **Non-Linear Mouse Movement:** Uses Bezier curves instead of straight-line cursor movement.
+* **Workday Logic:** Supports shift schedules, randomized start and end times, and lunch breaks.
 
-1. **Hardware:** Use a Raspberry Pi Zero (or Zero 2 W) connected via the **Data/OTG** micro-USB port to the work PC.
-2. **Setup:** Run `sudo ./setup_hid.sh` to initialize the HID ports.
-3. **Run:** Execute `python3 ghost_sim.py`. The Pi will now wait for your "Shift Start" time and begin activity.
+## How It Works
 
-Unlike software-based "jigglers" or basic Arduinos, GhostHID transforms a Raspberry Pi Zero into a legitimate, hardware-level USB Human Interface Device (HID). It doesn't just "move the mouse"; it emulates human behavior.
+GhostHID uses a three-layer system:
 
-🛠️ Why GhostHID?
-Most enterprise monitoring "robots" flag activity that looks programmatic. GhostHID solves this by operating at the kernel level with:
+1. **Hardware Layer (`setup_hid.sh`)**
 
-Hardware Spoofing: Identifies as a standard consumer peripheral (e.g., a Logitech Keyboard or Dell Mouse) using custom Vendor IDs (VID) and Product IDs (PID).
+   * Configures the Raspberry Pi in USB Gadget mode.
+   * Creates `/dev/hidg0` for keyboard input.
+   * Creates `/dev/hidg1` for mouse input.
 
-Variable Keystroke Dynamics: Types text with randomized delays and "human-error" simulations (mistyping and backspacing).
+2. **Data Layer (`generator.py`)**
 
-Non-Linear Mouse Movement: Uses Bezier Curves to move the cursor smoothly across the screen, avoiding the "pixel-perfect" straight lines that trip modern detectors.
+   * Generates a library of 50+ professional-sounding work notes.
+   * Produces `work_notes.txt`, which is used as the source of typed text.
 
-Workday Logic: Supports "shift patterns," including randomized start/end times and lunch breaks.
+3. **Logic Layer (`ghost_sim.py`)**
 
-🚀 How It Works
-GhostHID uses the Linux libcomposite driver to configure the Raspberry Pi Zero's OTG port. To your computer, the Pi is indistinguishable from a physical USB device plugged into the tower.
+   * Controls typing speed, pauses, typos, corrections, and mouse movement.
+   * Reads from `work_notes.txt` and performs the simulation loop.
 
-Current Features
-[Planned] Ghost-Typewriter: Feeds professional "brainstorming" notes or documentation into any text editor at a natural WPM.
+## File Manifest
 
-[Planned] Organic Jitter: Small, erratic mouse movements that simulate a hand resting on a mouse or shifting a window.
+| File             | Purpose                                         |
+| ---------------- | ----------------------------------------------- |
+| `setup_hid.sh`   | Initializes USB keyboard and mouse gadget mode. |
+| `generator.py`   | Generates the `work_notes.txt` file.            |
+| `ghost_sim.py`   | Main simulation engine and control loop.        |
+| `work_notes.txt` | Source text typed during the simulation.        |
 
-[Planned] Profile Switching: Toggle between "Deep Work" (typing-heavy) and "Research" (mouse-heavy) modes.
+## Installation & Usage
 
-📂 Project Structure
-setup_hid.sh: The core bash script to initialize USB Gadget mode on the Pi.
+1. Connect a Raspberry Pi Zero or Raspberry Pi Zero 2 W to the target computer using the Data/OTG USB port.
+2. Initialize the HID device:
 
-ghost_sim.py: The Python engine handling the "Human Logic."
+```bash
+sudo ./setup_hid.sh
+```
 
-notes/: A directory for pre-generated text snippets to be typed out.
+3. Start the simulator:
 
-⚠️ Disclaimer
-This project is for educational and research purposes only. The goal is to explore the limits of HID emulation and hardware-level automation. Use responsibly and in accordance with your local policies and agreements.
+```bash
+python3 ghost_sim.py
+```
 
-🤝 Contributing
-This is a community-driven project.im looking for:
+4. The simulator will wait until the configured shift start time and then begin generating activity.
 
-Mathematicians to improve our Bezier curve mouse movements.
+## Example Runtime Flow
 
-Linux Kernel Enthusiasts to expand USB descriptor options.
+1. The target computer detects the Raspberry Pi as a keyboard and mouse.
+2. `ghost_sim.py` checks the current time.
+3. When the configured work period begins, it selects a note from `work_notes.txt`.
+4. Mouse movement data is written to `/dev/hidg1`.
+5. Keyboard data is written to `/dev/hidg0`.
+6. The loop repeats with randomized timing and movement patterns.
 
-UI/UX Designers to create a simple web interface for the Pi.
+## Current Features
 
+* USB HID keyboard and mouse emulation
+* Human-like typing delays and corrections
+* Professional note generation
+* Bezier-curve mouse movement
+* Configurable workday scheduling
+* Randomized shift start, end, and break times
+
+## Planned Features
+
+* **Ghost-Typewriter:** Improved note generation for brainstorming and documentation.
+* **Organic Jitter:** Small erratic mouse movements that simulate a hand resting on a mouse.
+* **Profile Switching:** Toggle between typing-heavy and mouse-heavy behavior profiles.
+* **Expanded USB Profiles:** Additional keyboard and mouse descriptor options.
+* **Web Interface:** A simple browser-based interface for configuring the Raspberry Pi.
+
+## Disclaimer
+
+This project is for educational and research purposes only. The goal is to explore the limits of HID emulation and hardware-level automation. Use responsibly and in accordance with your local laws, workplace policies, and agreements.
+
+## Contributing
+
+GhostHID is a community-driven project. Contributions are welcome in the following areas:
+
+* Mathematicians to improve Bezier curve mouse movement.
+* Linux kernel enthusiasts to expand USB descriptor options.
+* UI/UX designers to create a simple web interface for the Raspberry Pi.
+* Python developers to improve the simulation engine and note generation.
