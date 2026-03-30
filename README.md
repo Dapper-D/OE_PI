@@ -62,9 +62,10 @@ python3 ghost_sim.py
 1. The target computer detects the Raspberry Pi as a keyboard and mouse.
 2. `ghost_sim.py` checks the current time.
 3. When the configured work period begins, it selects a note from `work_notes.txt`.
-4. Mouse movement data is written to `/dev/hidg1`.
-5. Keyboard data is written to `/dev/hidg0`.
-6. The loop repeats with randomized timing and movement patterns.
+4. Starts by 9am, automatically "logs off" after 5 PM and "takes lunch" at noon.
+5. Mouse movement data is written to `/dev/hidg1`.
+6. Keyboard data is written to `/dev/hidg0`.
+7. The loop repeats with randomized timing and movement patterns.
 
 ## Current Features
 
