@@ -1,10 +1,21 @@
 import random
 
-subjects = ["AWS S3", "EC2 Auto-scaling", "IAM Policy", "Lambda", "Terraform", "CloudWatch"]
-actions = ["reviewing logs for", "optimizing the", "documenting the", "restructuring", "debugging"]
-reasons = ["due to high latency.", "to improve security.", "for the Q3 audit.", "as per the new spec."]
+# Technical vocabulary to blend in with Cloud/IT workloads
+tech_stack = ["AWS S3", "EC2 Cluster", "IAM Role", "Lambda Function", "Terraform Script", "CloudWatch Alarm", "VPC Peering"]
+verbs = ["optimizing", "refactoring", "documenting", "debugging", "reviewing logs for", "scaling"]
+outcomes = ["to reduce latency.", "for the security audit.", "to handle spike traffic.", "per the architecture review.", "to lower monthly spend."]
 
-with open("work_notes.txt", "w") as f:
-    for _ in range(50):
-        note = f"{random.choice(subjects)}: {random.choice(actions)} {random.choice(subjects)} {random.choice(reasons)}\n"
-        f.write(note)
+def generate_notes(count=50):
+    with open("work_notes.txt", "w") as f:
+        for _ in range(count):
+            # Mix and match to create unique sentences
+            s = random.choice(tech_stack)
+            v = random.choice(verbs)
+            o = random.choice(outcomes)
+            
+            note = f"{v.capitalize()} {s} {o}\n"
+            f.write(note)
+    print(f"✅ Successfully generated {count} unique work notes.")
+
+if __name__ == "__main__":
+    generate_notes()
