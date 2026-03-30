@@ -1,0 +1,12 @@
+This script is the "heart" of the hardware side. It uses the Linux ConfigFS to tell the Raspberry Pi's kernel to stop acting like a computer and start behaving like a specific USB peripheral.
+When you run this, your work computer will see a "New Device Found" notification, just like if you plugged in a brand-new keyboard.
+
+What this code actually does:
+The "Spoof": In section 4, I set the manufacturer to "Logitech." You can change this to "Dell," "HP," or "Microsoft" to blend in with your existing hardware.
+
+The Ports: This creates two "files" on the Pi: /dev/hidg0 (the keyboard) and /dev/hidg1 (the mouse).
+
+Communication: To type a "A," our Python script just needs to write a specific byte-code to that hidg0 file. The Pi handles the electrical conversion to USB signals.
+
+How to use this:
+In a real-world scenario, you’d run chmod +x setup_hid.sh and then sudo ./setup_hid.sh.
