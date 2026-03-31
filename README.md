@@ -1,3 +1,6 @@
+## 💾 Download & Install
+**[👉 Download the latest GhostHID_Installer.exe here](https://github.com/Dapper-D/GhostHID/releases/latest)**
+
 # 👻 GhostHID: The Human-Centric Peripheral Emulator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
