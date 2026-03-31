@@ -1,4 +1,12 @@
 # 👻 GhostHID: The Human-Centric Peripheral Emulator
+**### 🔨 Building from Source
+If you want to compile the `.exe` yourself, run:
+`pip install pyinstaller paramiko`
+
+Then run:
+`python -m PyInstaller --onefile --name "GhostHID_Installer" --add-data "src/setup_hid.sh;src" --add-data "src/ghost_sim.py;src" --clean scripts/GhostHID_Installer.py`
+
+Then goto your dist/ folder**
 
 **[👉 Download the latest GhostHID_Installer.exe here](https://github.com/Dapper-D/GhostHID/releases/latest)**
 
