@@ -1,68 +1,84 @@
 import os
 import sys
 import paramiko
-import time
+import random
+import string
 
-# 1. Logic to find files bundled inside the .exe
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
+    """ Required for PyInstaller to find internal files """
     try:
         base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+def generate_serial(length=16):
+    """ Avoids hardware fingerprinting by generating a unique Serial Number """
+    return ''.join(random.choices(string.hexdigits.lower(), k=length))
+
 def run_installer():
-    print("--- GhostHID Windows One-Click Setup ---")
-    print("Searching for Raspberry Pi on USB...")
+    print("--- 👻 GhostHID One-Click Setup (Alpha) ---")
+    
+    # 1. Gather User Preferences
+    print("\n[🕒 SHIFT CONFIGURATION]")
+    start = input("Start time? (e.g. 08:00): ")
+    end = input("End time? (e.g. 16:30): ")
+    lunch = input("Lunch time? (e.g. 12:00): ")
 
-    # Define paths to our bundled scripts
-    # These must match the folder structure in your GitHub /src folder
-    local_setup_sh = resource_path("src/setup_hid.sh")
-    local_ghost_py = resource_path("src/ghost_sim.py")
+    # 2. Security Setup
+    print("\n[🔐 SECURITY SETUP]")
+    new_pw = input("Set a NEW password for your Pi: ")
+    unique_serial = generate_serial()
 
-    # Default Pi credentials for USB-Ethernet mode
-    pi_ip = "192.168.0.1" # Standard for Pi Zero OTG
+    # 3. Create Config File locally
+    with open("config.ini", "w") as f:
+        f.write(f"[SHIFT]\nstart_time = {start}\nend_time = {end}\n")
+        f.write(f"\n[LUNCH]\nlunch_start = {lunch}\nlunch_duration_minutes = 60\n")
+
+    # 4. Deployment Logic
+    pi_ip = "192.168.0.1" # Default for Pi Zero OTG
     user = "pi"
-    pw = "raspberry"
+    default_pw = "raspberry"
 
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        print(f"\n🚀 Connecting to GhostHID Hardware...")
+        ssh.connect(pi_ip, username=user, password=default_pw, timeout=15)
         
-        # Connect to the Pi
-        ssh.connect(pi_ip, username=user, password=pw, timeout=10)
-        print("✅ Connected to GhostHID Hardware.")
-
-        # Step 1: Upload Files
-        print("Step 1: Uploading core logic...")
+        # Upload Files
         sftp = ssh.open_sftp()
-        sftp.put(local_setup_sh, '/home/pi/setup_hid.sh')
-        sftp.put(local_ghost_py, '/home/pi/ghost_sim.py')
+        sftp.put(resource_path("src/setup_hid.sh"), '/home/pi/setup_hid.sh')
+        sftp.put(resource_path("src/ghost_sim.py"), '/home/pi/ghost_sim.py')
+        sftp.put("config.ini", '/home/pi/config.ini')
         sftp.close()
 
-        # Step 2: Configure Hardware & Service
-        print("Step 2: Configuring HID Drivers & Auto-Start...")
+        # Execute Config
+        print("⚙️ Applying spoofing and securing device...")
         commands = [
-            "chmod +x /home/pi/setup_hid.sh",
-            "sudo /home/pi/setup_hid.sh",
-            "echo 'dtoverlay=dwc2' | sudo tee -a /boot/config.txt",
-            "echo 'dwc2' | sudo tee -a /etc/modules",
-            "sudo systemctl enable /home/pi/ghosthid.service" # Assuming service file is also pushed
+            f"echo '{user}:{new_pw}' | sudo chpasswd",
+            f"sudo bash /home/pi/setup_hid.sh {unique_serial}",
+            "echo 'dtoverlay=dwc2' | sudo tee -a /boot/config.txt"
         ]
-        
         for cmd in commands:
             ssh.exec_command(cmd)
-            
-        print("\n🎉 SUCCESS: GhostHID is now active and spoofing a Logitech Keyboard.")
-        print("You can now unplug and replug the device to finish initialization.")
+
+        print("\n" + "★"*40)
+        print("🎉 SETUP COMPLETE!")
+        print(f"Serial: {unique_serial}")
+        print(f"New SSH Password: {new_pw}")
+        print("-" * 40)
+        print("⚠️  PRO-TIP: For the best results, keep a blank Notepad")
+        print("   open and in focus. GhostHID will type into")
+        print("   whatever window is currently active!")
+        print("★"*40)
 
     except Exception as e:
-        print(f"\n❌ ERROR: Could not connect to Pi. {e}")
-        print("Check: Is the Pi in OTG/Data mode? Is the cable a Data cable?")
+        print(f"\n❌ FAILED: {e}")
+        print("Check your Data Cable and ensure the Pi is in OTG mode.")
 
-    ssh.close()
-    input("\nPress Enter to close...")
+    if 'ssh' in locals(): ssh.close()
+    input("\nPress Enter to Exit...")
 
 if __name__ == "__main__":
     run_installer()
